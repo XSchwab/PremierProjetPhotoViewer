@@ -76,7 +76,7 @@ namespace PremierProjetPhotoViewer
                 //BitmapMetadata m2 = (BitmapMetadata)frame.Metadata;
                 fs.Flush();
                 fs.Close();
-
+                // Test
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
                 //string Ctags = metadata.GetQuery("System.Author") as string;
                 if (tags != null && metadata.Author != null)
