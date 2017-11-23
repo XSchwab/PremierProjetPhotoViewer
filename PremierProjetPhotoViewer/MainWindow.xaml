@@ -2,11 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PremierProjetPhotoViewer"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
+        xmlns:local1="clr-namespace:PremierProjetPhotoViewer"
         mc:Ignorable="d"
         Title="MainWindow" Height="1062.5" Width="1920">
-    <Grid>
+
+    <Window.Resources>
+        <local1:UriToBitmapConverter x:Key="UriToBitmapConverter" />
+    </Window.Resources>
+    <ScrollViewer>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Background="LightBlue" Height="40">
                 <Label Margin="10,0,0,0" Height="23" Name="Label1">
@@ -33,20 +37,20 @@
                 <TextBlock x:Name="TagViewer2" Height="58" Width="400" Margin="756,0" />
 
             </StackPanel>
-            <ScrollViewer>
-       
+
+            <Grid>
                 <ItemsControl Name="ImageList" ItemsSource="{Binding ImageList}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1" BorderBrush="#FFD0D1D7" Padding="5" Margin="10,10,0,0">
                                 <StackPanel Orientation="Horizontal">
+
                                     <!--image and dimensions-->
-                                     
                                     <Grid Width="88" Height="55">
-                                        <Image Source="{Binding Path}" MouseLeftButtonDown="ImageButton_Click"/>
+
+                                        <Image Source="{Binding Path, Converter={StaticResource UriToBitmapConverter}}" MouseLeftButtonDown="ImageButton_Click"/>
                                     </Grid>
-                                  
-                                        <!--name, type and size-->
+                                    <!--name, type and size-->
                                     <StackPanel Orientation="Horizontal" Margin="5,0,0,0" VerticalAlignment="Center">
                                         <TextBlock Name="ImageName" Margin="1" Foreground="#FF787878" Text="{Binding FileName}"/>
                                     </StackPanel>
@@ -55,9 +59,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-         
-            </ScrollViewer>
-
+            </Grid>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </Window>

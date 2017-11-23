@@ -149,14 +149,13 @@ namespace PremierProjetPhotoViewer
 
                 var tags = GetTags(dlg.FileName);
                 List<ImageDetails> images = new List<ImageDetails>();
-               /* ImageDetails id = new ImageDetails()
+                ImageDetails id = new ImageDetails()
                 {
                     Path = selectedFileName.ToString(),
                     FileName = System.IO.Path.GetFileName(selectedFileName.ToString()),
                     //Extension = Path.GetExtension(file.ToString()) 
-                };*/
+                };
                 
-
                 FileNameLabel.Content = selectedFileName;
                 BitmapImage bitmap = new BitmapImage();
                 FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
@@ -166,43 +165,14 @@ namespace PremierProjetPhotoViewer
                 bitmap.EndInit();
                 stream.Close();
                 stream.Dispose();
-               // id.Width = bitmap.PixelWidth;
-                //id.Height = bitmap.PixelHeight;
-                //images.Add(id);
+                id.Width = bitmap.PixelWidth;
+                id.Height = bitmap.PixelHeight;
+                images.Add(id);
                 ImageViewer1.Source = bitmap;
-                //ImageList.ItemsSource = images;
+                ImageList.ItemsSource = images;
+                
             }
 
-        }
-
-        private void TagButton_Click(object sender, RoutedEventArgs e)
-        {
-            ImageList.ItemsSource = null;
-            var tag = FileNameLabel.Content;
-            string[] tags = GetTags(tag.ToString());
-            AddTags(tag.ToString(), tags);
-            GetTags(tag.ToString());
-        }
-
-        private bool fileIsOpen(string file)
-        {
-            try
-            {
-                FileStream fs;
-                fs = File.Open(file, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                if (fs != null)
-                {
-                    fs.Close();
-                    fs.Dispose();
-                    return false;
-                }
-                else
-                    return true;
-            }
-            catch(IOException)
-            {
-                return true;
-            }
         }
 
         private void BrowseThumbnaiButton_Click(object sender, RoutedEventArgs e)
@@ -215,50 +185,54 @@ namespace PremierProjetPhotoViewer
             {
                 var files = Directory.GetFiles(dlg.SelectedPath).Where(s => supportedExtensions.Contains(System.IO.Path.GetExtension(s).ToLower()));
                 List<ImageDetails> images = new List<ImageDetails>();
-              
-                    foreach (var file in files)
+
+                foreach (var file in files)
+                {
+                    ImageDetails id = new ImageDetails()
                     {
-                        ImageDetails id = new ImageDetails()
-                        {
-                            Path = file.ToString(),
-                            FileName = System.IO.Path.GetFileName(file.ToString()),
-                            //Extension = Path.GetExtension(file.ToString()) 
-                        };
-                        var filename = System.IO.Path.GetFullPath(file.ToString());
+                        Path = file.ToString(),
+                        FileName = System.IO.Path.GetFileName(file.ToString()),
+                        //Extension = Path.GetExtension(file.ToString()) 
+                    };
+                    var filename = System.IO.Path.GetFullPath(file.ToString());
 
-                   
-                        BitmapImage bitmap = new BitmapImage();
-                        FileStream stream;
-                        using (stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        {
-                            bitmap.BeginInit();
-                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                            bitmap.StreamSource = stream;
-                            bitmap.EndInit();
-                            stream.Close();
-                                stream.Dispose();                              
-                            
-                            
-                        }
-             
-                        id.Width = bitmap.PixelWidth;
-                        id.Height = bitmap.PixelHeight;
-                        images.Add(id);
-
-                   
-                    fileIsOpen(filename);
-                    }
-
+                    BitmapImage bitmap = new BitmapImage();
+                    FileStream stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+                    stream.Close();
+                    stream.Dispose();
+                    id.Width = bitmap.PixelWidth;
+                    id.Height = bitmap.PixelHeight;
+                    images.Add(id);
+                }
+           
+                RetrieveList.myList = images;              
                 ImageList.ItemsSource = images;
-                images.Clear();
-              
 
             }
+        }
 
+        public class RetrieveList
+        {
+            public static List<ImageDetails> myList { get; set; }
         }
 
 
+        private void TagButton_Click(object sender, RoutedEventArgs e)
+        {                    
+            ImageList.ItemsSource = null;
+            var tag = FileNameLabel.Content;
+            string[] tags = GetTags(tag.ToString());
+            AddTags(tag.ToString(), tags);
+            GetTags(tag.ToString());
+            ImageList.ItemsSource = RetrieveList.myList;
+        }
 
+    
+      
         private void ImageButton_Click(object sender, MouseButtonEventArgs e)
         {
             var clickedImage = (System.Windows.Controls.Image)e.OriginalSource;
@@ -273,12 +247,10 @@ namespace PremierProjetPhotoViewer
             FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = stream;
-            //bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;         
+            bitmap.StreamSource = stream;                  
             bitmap.EndInit();        
-          //  stream.Close();
-           // stream.Dispose();
-            fileIsOpen(selectedFileName);
+            stream.Close();
+            stream.Dispose();  
             ImageViewer1.Source = bitmap;
         }
 
