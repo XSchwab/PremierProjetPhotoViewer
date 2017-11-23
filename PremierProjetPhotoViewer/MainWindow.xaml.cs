@@ -38,7 +38,7 @@ namespace PremierProjetPhotoViewer
         {
             uint paddingAmount = 2048;
 
-            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Read))
+            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Write))
             {
                 BitmapDecoder original = BitmapDecoder.Create(file, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
                 JpegBitmapEncoder output = new JpegBitmapEncoder();
@@ -51,7 +51,8 @@ namespace PremierProjetPhotoViewer
                     metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
-                    metadata.SetQuery("System.Keywords", tags);
+                    metadata.SetQuery("System.Keywords", tags[0]);
+                    
 
                     output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
 
@@ -72,11 +73,9 @@ namespace PremierProjetPhotoViewer
             {
                 BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
                 BitmapFrame frame = decoder.Frames[0];
-                BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
-                //BitmapMetadata m2 = (BitmapMetadata)frame.Metadata;
+                BitmapMetadata metadata = frame.Metadata as BitmapMetadata;    
                 fs.Flush();
-                fs.Close();
-                
+                fs.Close();               
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
                 //string Ctags = metadata.GetQuery("System.Author") as string;
                 if (tags != null && metadata.Author != null)
@@ -85,6 +84,7 @@ namespace PremierProjetPhotoViewer
                     TagViewer2.Text = metadata.Author[0];
 
                 }
+
                
                 fs.Dispose();
                 return tags;
@@ -124,11 +124,19 @@ namespace PremierProjetPhotoViewer
                 else
                 {
                     keys = tags;
-                    writer.SetQuery("System.Keywords", tags);
+                    var test = TagWriter.Text;
+                    var test2 = TagWriter2.Text;
+                    writer.SetQuery("System.Keywords", test);
+                    writer.SetQuery("System.Author", test2);
                 }
                 if (!writer.TrySave())
                 {
-                    SetUpMetadataOnImage(filename, keys);
+                    fs.Close();
+                    fs.Dispose();
+                    string[] test = metadata.GetQuery("System.Keywords") as string[];
+                    test[0] = TagWriter.Text;
+                   
+                    SetUpMetadataOnImage(filename, test);
                 }
             }
         }
@@ -149,12 +157,7 @@ namespace PremierProjetPhotoViewer
 
                 var tags = GetTags(dlg.FileName);
                 List<ImageDetails> images = new List<ImageDetails>();
-                ImageDetails id = new ImageDetails()
-                {
-                    Path = selectedFileName.ToString(),
-                    FileName = System.IO.Path.GetFileName(selectedFileName.ToString()),
-                    //Extension = Path.GetExtension(file.ToString()) 
-                };
+             
                 
                 FileNameLabel.Content = selectedFileName;
                 BitmapImage bitmap = new BitmapImage();
@@ -164,13 +167,9 @@ namespace PremierProjetPhotoViewer
                 bitmap.StreamSource = stream;
                 bitmap.EndInit();
                 stream.Close();
-                stream.Dispose();
-                id.Width = bitmap.PixelWidth;
-                id.Height = bitmap.PixelHeight;
-                images.Add(id);
+                stream.Dispose();           
                 ImageViewer1.Source = bitmap;
-                ImageList.ItemsSource = images;
-                
+                             
             }
 
         }

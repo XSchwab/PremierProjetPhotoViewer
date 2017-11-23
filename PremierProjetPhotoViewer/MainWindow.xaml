@@ -28,12 +28,16 @@
             <StackPanel >
 
                 <Image Name="ImageViewer1" Height="287" Margin="32,0" />
+                <Label>Keyword</Label>
                 <TextBox Name="TagWriter" Height="23" TextWrapping="Wrap"  />
+                <Label>Auteur</Label>
                 <TextBox Name="TagWriter2" Height="23" TextWrapping="Wrap"  />
                 <Button Margin="5,0,0,0" Height="23" Name="TagButton" Width="75"  Click="TagButton_Click">
                     Set Tag
                 </Button>
+                <Label>Keyword</Label>
                 <TextBlock Name="TagViewer1" Height="39" Width="400" Margin="756,0" />
+                <Label>Auteur</Label>
                 <TextBlock x:Name="TagViewer2" Height="58" Width="400" Margin="756,0" />
 
             </StackPanel>
