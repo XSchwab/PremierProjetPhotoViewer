@@ -34,11 +34,11 @@ namespace PremierProjetPhotoViewer
 
         }
 
-        private static void SetUpMetadataOnImage(string filename, string[] tags)
+        private static void SetUpMetadataOnImage(string filename, string tags)
         {
             uint paddingAmount = 2048;
 
-            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Write))
+            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 BitmapDecoder original = BitmapDecoder.Create(file, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
                 JpegBitmapEncoder output = new JpegBitmapEncoder();
@@ -51,12 +51,13 @@ namespace PremierProjetPhotoViewer
                     metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
-                    metadata.SetQuery("System.Keywords", tags[0]);
+                    metadata.SetQuery("System.Title", tags);
                     
-
                     output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
 
                     file.Close();
+                    file.Dispose();
+                   
 
                 }
                 using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
@@ -78,14 +79,18 @@ namespace PremierProjetPhotoViewer
                 fs.Close();               
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
                 //string Ctags = metadata.GetQuery("System.Author") as string;
-                if (tags != null && metadata.Author != null)
+                if (tags != null )
                 {
                     TagViewer1.Text = tags[0];
-                    TagViewer2.Text = metadata.Author[0];
+                   
 
                 }
+                if(metadata.Author != null)
+                {
+                    TagViewer2.Text = metadata.Author[0];
+                }
 
-               
+                RetrieveList.DateList = metadata.DateTaken;
                 fs.Dispose();
                 return tags;
             }
@@ -102,7 +107,7 @@ namespace PremierProjetPhotoViewer
                 InPlaceBitmapMetadataWriter writer = frame.CreateInPlaceBitmapMetadataWriter();
 
                 string[] keys;
-                if (metadata.Keywords != null)
+                if (metadata.Title != null)
                 {
                     keys = new string[metadata.Keywords.Count + tags.Length];
                     var keyTag = TagWriter.Text;
@@ -126,16 +131,16 @@ namespace PremierProjetPhotoViewer
                     keys = tags;
                     var test = TagWriter.Text;
                     var test2 = TagWriter2.Text;
-                    writer.SetQuery("System.Keywords", test);
+                    writer.SetQuery("System.Title", test);
                     writer.SetQuery("System.Author", test2);
                 }
                 if (!writer.TrySave())
                 {
                     fs.Close();
                     fs.Dispose();
-                    string[] test = metadata.GetQuery("System.Keywords") as string[];
-                    test[0] = TagWriter.Text;
-                   
+                    string test = TagWriter.Text;
+                    //test[0] = TagWriter.Text;
+                    //var testo = "jeje";
                     SetUpMetadataOnImage(filename, test);
                 }
             }
@@ -182,11 +187,30 @@ namespace PremierProjetPhotoViewer
 
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                DirectoryInfo d = new DirectoryInfo(dlg.SelectedPath);
+                FileInfo[] infos = d.GetFiles();
+               
+                foreach(FileInfo f in infos)
+                {
+                    GetTags(f.FullName);
+                  var  DateTaken = RetrieveList.DateList;
+                    DateTaken = DateTaken.Replace(@"/", @"-");
+                    DateTaken = DateTaken.Replace(@":", @"-");
+                    DateTaken = DateTaken.Replace(@" ", @"--");                   
+                    string ImgName = f.Name;
+                    var name = ImgName.Split('_');
+                    string verifyString = name[0];
+                    if(verifyString != DateTaken)
+                    {
+                                File.Move(f.FullName, f.DirectoryName + "\\" + DateTaken + "_" + f.Name);
+                    }
+            
+                }
                 var files = Directory.GetFiles(dlg.SelectedPath).Where(s => supportedExtensions.Contains(System.IO.Path.GetExtension(s).ToLower()));
                 List<ImageDetails> images = new List<ImageDetails>();
 
                 foreach (var file in files)
-                {
+                {            
                     ImageDetails id = new ImageDetails()
                     {
                         Path = file.ToString(),
@@ -194,7 +218,7 @@ namespace PremierProjetPhotoViewer
                         //Extension = Path.GetExtension(file.ToString()) 
                     };
                     var filename = System.IO.Path.GetFullPath(file.ToString());
-
+                    
                     BitmapImage bitmap = new BitmapImage();
                     FileStream stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
                     bitmap.BeginInit();
@@ -214,9 +238,11 @@ namespace PremierProjetPhotoViewer
             }
         }
 
+        //objet statique pour garder la liste en memoire
         public class RetrieveList
         {
             public static List<ImageDetails> myList { get; set; }
+            public static string DateList { get; set; }
         }
 
 
@@ -243,7 +269,7 @@ namespace PremierProjetPhotoViewer
             var tags = GetTags(selectedFileName);
             FileNameLabel.Content = selectedFileName;
             BitmapImage bitmap = new BitmapImage();
-            FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+            FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.StreamSource = stream;                  
