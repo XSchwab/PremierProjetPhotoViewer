@@ -23,7 +23,12 @@
                 <Button Margin="5,0,0,0" Height="23" Name="BrowseThumbnailButton" Width="75" Click="BrowseThumbnaiButton_Click">
                     Browse folder
                 </Button>
-
+                <TextBlock Height="23" HorizontalAlignment="Left" Margin="60,18,0,0"
+                Name="textBlock1" Text="Search Name"
+                VerticalAlignment="Top" Width="134" />
+                <TextBox Height="27" HorizontalAlignment="Left" Margin="208,13,0,0"
+                Name="txtNameToSearch" TextChanged="txtNameToSearch_TextChanged"
+                VerticalAlignment="Top" Width="202" />
             </StackPanel>
             <StackPanel >
 

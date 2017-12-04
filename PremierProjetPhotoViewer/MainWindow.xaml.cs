@@ -19,6 +19,7 @@ using System.IO;
 using System.Net;
 using System.Drawing;
 using PremierProjetPhotoViewer.Model;
+using System.Collections.ObjectModel;
 
 namespace PremierProjetPhotoViewer
 {
@@ -52,12 +53,12 @@ namespace PremierProjetPhotoViewer
                     metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("System.Title", tags);
-                    
+
                     output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
 
                     file.Close();
                     file.Dispose();
-                   
+
 
                 }
                 using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
@@ -74,23 +75,23 @@ namespace PremierProjetPhotoViewer
             {
                 BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
                 BitmapFrame frame = decoder.Frames[0];
-                BitmapMetadata metadata = frame.Metadata as BitmapMetadata;    
+                BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
                 fs.Flush();
-                fs.Close();               
+                fs.Close();
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
                 //string Ctags = metadata.GetQuery("System.Author") as string;
-                if (tags != null )
+                if (tags != null)
                 {
                     TagViewer1.Text = tags[0];
-                   
-
                 }
-                if(metadata.Author != null)
+                if (metadata.Author != null)
                 {
                     TagViewer2.Text = metadata.Author[0];
                 }
-
+                DateTime creation = File.GetCreationTime(filename);
                 RetrieveList.DateList = metadata.DateTaken;
+                RetrieveList.DateCreate = creation.ToString();
+                //RetrieveList.DateCreate = metadata
                 fs.Dispose();
                 return tags;
             }
@@ -162,8 +163,8 @@ namespace PremierProjetPhotoViewer
 
                 var tags = GetTags(dlg.FileName);
                 List<ImageDetails> images = new List<ImageDetails>();
-             
-                
+
+
                 FileNameLabel.Content = selectedFileName;
                 BitmapImage bitmap = new BitmapImage();
                 FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
@@ -172,9 +173,9 @@ namespace PremierProjetPhotoViewer
                 bitmap.StreamSource = stream;
                 bitmap.EndInit();
                 stream.Close();
-                stream.Dispose();           
+                stream.Dispose();
                 ImageViewer1.Source = bitmap;
-                             
+
             }
 
         }
@@ -189,28 +190,37 @@ namespace PremierProjetPhotoViewer
             {
                 DirectoryInfo d = new DirectoryInfo(dlg.SelectedPath);
                 FileInfo[] infos = d.GetFiles();
-               
-                foreach(FileInfo f in infos)
+                foreach (FileInfo f in infos)
                 {
                     GetTags(f.FullName);
-                  var  DateTaken = RetrieveList.DateList;
+                    var DateTaken = RetrieveList.DateList;
+                    var DateCreate = RetrieveList.DateCreate;
+                    DateCreate = DateCreate.Replace(@"/", @"-");
+                    DateCreate = DateCreate.Replace(@":", @"-");
+                    DateCreate = DateCreate.Replace(@" ", @"--");
+                    if (DateTaken == null)
+                    {
+                        File.Move(f.FullName, f.DirectoryName + "\\" + DateCreate + "_" + d.Name + f.Extension);
+                    }
+                    else { 
                     DateTaken = DateTaken.Replace(@"/", @"-");
                     DateTaken = DateTaken.Replace(@":", @"-");
-                    DateTaken = DateTaken.Replace(@" ", @"--");                   
+                    DateTaken = DateTaken.Replace(@" ", @"--");
                     string ImgName = f.Name;
                     var name = ImgName.Split('_');
                     string verifyString = name[0];
-                    if(verifyString != DateTaken)
+                    if (verifyString != DateTaken)
                     {
-                                File.Move(f.FullName, f.DirectoryName + "\\" + DateTaken + "_" + f.Name);
+                        File.Move(f.FullName, f.DirectoryName + "\\" + DateTaken + "_" + d.Name + f.Extension);
                     }
-            
+                    }
                 }
+                
                 var files = Directory.GetFiles(dlg.SelectedPath).Where(s => supportedExtensions.Contains(System.IO.Path.GetExtension(s).ToLower()));
-                List<ImageDetails> images = new List<ImageDetails>();
-
+                //List<ImageDetails> images = new List<ImageDetails>();
+                ObservableCollection<ImageDetails> images = new ObservableCollection<ImageDetails>();
                 foreach (var file in files)
-                {            
+                {
                     ImageDetails id = new ImageDetails()
                     {
                         Path = file.ToString(),
@@ -218,7 +228,7 @@ namespace PremierProjetPhotoViewer
                         //Extension = Path.GetExtension(file.ToString()) 
                     };
                     var filename = System.IO.Path.GetFullPath(file.ToString());
-                    
+
                     BitmapImage bitmap = new BitmapImage();
                     FileStream stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
                     bitmap.BeginInit();
@@ -231,23 +241,25 @@ namespace PremierProjetPhotoViewer
                     id.Height = bitmap.PixelHeight;
                     images.Add(id);
                 }
-           
-                RetrieveList.myList = images;              
+
+                RetrieveList.myList = images;
                 ImageList.ItemsSource = images;
 
             }
         }
 
-        //objet statique pour garder la liste en memoire
+        //objet statique pour garder la liste d'image et la date en memoire
         public class RetrieveList
         {
-            public static List<ImageDetails> myList { get; set; }
+            public static ObservableCollection<ImageDetails> myList { get; set; }
+            //public static List<ImageDetails> myList { get; set; }
             public static string DateList { get; set; }
+            public static string DateCreate { get; set; }
         }
 
 
         private void TagButton_Click(object sender, RoutedEventArgs e)
-        {                    
+        {
             ImageList.ItemsSource = null;
             var tag = FileNameLabel.Content;
             string[] tags = GetTags(tag.ToString());
@@ -256,8 +268,8 @@ namespace PremierProjetPhotoViewer
             ImageList.ItemsSource = RetrieveList.myList;
         }
 
-    
-      
+
+
         private void ImageButton_Click(object sender, MouseButtonEventArgs e)
         {
             var clickedImage = (System.Windows.Controls.Image)e.OriginalSource;
@@ -272,15 +284,33 @@ namespace PremierProjetPhotoViewer
             FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = stream;                  
-            bitmap.EndInit();        
+            bitmap.StreamSource = stream;
+            bitmap.EndInit();
             stream.Close();
-            stream.Dispose();  
+            stream.Dispose();
             ImageViewer1.Source = bitmap;
         }
+ 
+        
 
+        ObservableCollection<ImageDetails> listImage = new ObservableCollection<ImageDetails>();
+        private void txtNameToSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            listImage = RetrieveList.myList;   
+            string txtOrig = txtNameToSearch.Text;
+            string upper = txtOrig.ToUpper();
+            string lower = txtOrig.ToLower();
 
+            var imgFiltered = from Img in listImage
+                              let ename = Img.FileName
+                              where
+                               ename.StartsWith(lower)
+                               || ename.StartsWith(upper)
+                               || ename.Contains(txtOrig)
+                              select Img;
 
+            ImageList.ItemsSource = imgFiltered;
+        }
 
     }
 }
