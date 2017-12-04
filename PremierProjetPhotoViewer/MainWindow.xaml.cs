@@ -217,7 +217,7 @@ namespace PremierProjetPhotoViewer
                 }
                 
                 var files = Directory.GetFiles(dlg.SelectedPath).Where(s => supportedExtensions.Contains(System.IO.Path.GetExtension(s).ToLower()));
-                //List<ImageDetails> images = new List<ImageDetails>();
+               
                 ObservableCollection<ImageDetails> images = new ObservableCollection<ImageDetails>();
                 foreach (var file in files)
                 {
