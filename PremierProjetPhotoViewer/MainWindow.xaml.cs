@@ -48,17 +48,17 @@ namespace PremierProjetPhotoViewer
                 fs.Close();
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
                 //string Ctags = metadata.GetQuery("System.Author") as string;
-                if (tags != null)
+                if (metadata.Keywords != null)
                 {
-                    TagViewer1.Text = tags[0];
+                    TagViewer1.Text = metadata.Keywords[0];
                 }
                 if (metadata.Author != null)
                 {
                     TagViewer2.Text = metadata.Author[0];
                 }
-                DateTime creation = File.GetCreationTime(filename);
+                DateTime modification = File.GetLastWriteTime(filename);
                 RetrieveList.DateList = metadata.DateTaken;
-                RetrieveList.DateCreate = creation.ToString();
+                RetrieveList.DateModificate = modification.ToString();
                 //RetrieveList.DateCreate = metadata
                 fs.Dispose();
                 return tags;
@@ -77,7 +77,7 @@ namespace PremierProjetPhotoViewer
                 InPlaceBitmapMetadataWriter writer = frame.CreateInPlaceBitmapMetadataWriter();
 
                 string[] keys;
-                if (metadata.Title != null)
+                if (metadata.Keywords != null)
                 {
                     keys = new string[metadata.Keywords.Count + tags.Length];
                     var keyTag = TagWriter.Text;
@@ -148,43 +148,7 @@ namespace PremierProjetPhotoViewer
                 }
             }
         }
-
-       
-
-        
-
-        private void BrowseButton_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.InitialDirectory = "c:\\";
-            dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-
-                string selectedFileName = dlg.FileName;
-                GetTags(dlg.FileName);
-
-                var tags = GetTags(dlg.FileName);
-                List<ImageDetails> images = new List<ImageDetails>();
-
-
-                FileNameLabel.Content = selectedFileName;
-                BitmapImage bitmap = new BitmapImage();
-                FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.StreamSource = stream;
-                bitmap.EndInit();
-                stream.Close();
-                stream.Dispose();
-                ImageViewer1.Source = bitmap;
-
-            }
-
-        }
-
+            
         //selectione le dossier voulu, crée une liste d'image et renomme les photos
         private void BrowseThumbnaiButton_Click(object sender, RoutedEventArgs e)
         {
@@ -200,13 +164,13 @@ namespace PremierProjetPhotoViewer
                 {
                     GetTags(f.FullName);
                     var DateTaken = RetrieveList.DateList;
-                    var DateCreate = RetrieveList.DateCreate;
-                    DateCreate = DateCreate.Replace(@"/", @"-");
-                    DateCreate = DateCreate.Replace(@":", @"-");
-                    DateCreate = DateCreate.Replace(@" ", @"--");
+                    var DateModificate = RetrieveList.DateModificate;
+                    DateModificate = DateModificate.Replace(@"/", @"-");
+                    DateModificate = DateModificate.Replace(@":", @"-");
+                    DateModificate = DateModificate.Replace(@" ", @"--");
                     if (DateTaken == null)
                     {
-                        File.Move(f.FullName, f.DirectoryName + "\\" + DateCreate + "_" + d.Name + f.Extension);
+                        File.Move(f.FullName, f.DirectoryName + "\\" + DateModificate + "_" + d.Name + f.Extension);
                     }
                     else { 
                     DateTaken = DateTaken.Replace(@"/", @"-");
@@ -257,10 +221,10 @@ namespace PremierProjetPhotoViewer
         //objet statique pour garder la liste d'image et la date en memoire
         public class RetrieveList
         {
-            public static ObservableCollection<ImageDetails> myList { get; set; }
-            //public static List<ImageDetails> myList { get; set; }
+            public static ObservableCollection<ImageDetails> myList { get; set; }       
             public static string DateList { get; set; }
-            public static string DateCreate { get; set; }
+            
+            public static string DateModificate { get; set; }
         }
 
         //envoie les tags à la méthode getTags
@@ -302,7 +266,6 @@ namespace PremierProjetPhotoViewer
 
         //recherche les images selon les mots tapé
         ObservableCollection<ImageDetails> listImage = new ObservableCollection<ImageDetails>();
-        ObservableCollection<MetadataDetails> metadatas = new ObservableCollection<MetadataDetails>();
         private void txtNameToSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
 
@@ -320,58 +283,61 @@ namespace PremierProjetPhotoViewer
                         CameraModel = metadata.CameraModel,
                         Keywords = metadata.Keywords,
                         Author = metadata.Author,
-                        Comment = metadata.Comment,
-                        Name = image.Name,
+                        Comment = metadata.Comment,  
+                        Title = metadata.Title,
                         FileName = image.FileName,
-                        Path = image.Path
-
+                        Path = image.Path,                                              
                     };
                     listImage.Add(Meta);
                 }
-            }
-
-
-           
+            }        
                 string txtOrig = txtNameToSearch.Text;
                 string upper = txtOrig.ToUpper();
                 string lower = txtOrig.ToLower();
 
-                var imgFiltered = from Img in listImage
-                                  let ename = Img.FileName
-                                  let enames = Img.Comment
-                                  where
-                                 ename.StartsWith(lower)
+            var imgFiltered = from Img in listImage
+                              let ename = Img.FileName
+                              let enameComment = Img.Comment
+                              let enameCameraModel = Img.CameraModel
+                              let enameTitle = Img.Title
+                              let enameAuthor = Img.Author[0]                              
+                              let enameKeywords = Img.Keywords[0]
+
+                              where 
+
+                             
+                                 ename.StartsWith(lower)                             
                                  || ename.StartsWith(upper)
                                  || ename.Contains(txtOrig)
-                                 || enames.StartsWith(lower)
-                                 || enames.StartsWith(upper)
-                                 || enames.Contains(txtOrig)
-                                  select Img;
 
-            
+                                 || enameComment.StartsWith(lower)
+                                 || enameComment.StartsWith(upper)
+                                 || enameComment.Contains(txtOrig)
 
-            ImageList.ItemsSource = imgFiltered;
-            
+                                 || enameCameraModel.StartsWith(lower)
+                                 || enameCameraModel.StartsWith(upper)
+                                 || enameCameraModel.Contains(txtOrig)
 
-             
-              
+                                 || enameAuthor.StartsWith(lower)
+                                 || enameAuthor.StartsWith(upper)
+                                 || enameAuthor.Contains(txtOrig)
 
-            
+                                 || enameKeywords.StartsWith(lower) 
+                                 || enameKeywords.StartsWith(upper)
+                                 || enameKeywords.Contains(txtOrig)
+
+                              
+                                 || enameTitle.StartsWith(lower)
+                                 || enameTitle.StartsWith(upper)
+                                 || enameTitle.Contains(txtOrig)
 
 
-            /*  string txtOrig = txtNameToSearch.Text;
-              string upper = txtOrig.ToUpper();
-              string lower = txtOrig.ToLower();
 
-              var imgFiltered = from Img in listImage
-                                let ename = Img.Author[0]
-                                where
-                                 ename.StartsWith(lower)
-                                 || ename.StartsWith(upper)
-                                 || ename.Contains(txtOrig)
-                                select Img;
+                              select Img;            
 
-              ImageList.ItemsSource = imgFiltered;*/
+            ImageList.ItemsSource = imgFiltered;                                                  
+
+  
         }
 
     }

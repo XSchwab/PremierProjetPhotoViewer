@@ -67,6 +67,8 @@ namespace PremierProjetPhotoViewer.Model
         public int Subject { get; set; }
 
         public string Title { get; set; }
+
+       
     }
 
 }
