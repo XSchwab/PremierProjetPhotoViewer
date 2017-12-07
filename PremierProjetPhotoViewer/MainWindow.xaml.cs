@@ -35,39 +35,7 @@ namespace PremierProjetPhotoViewer
 
         }
 
-        private static void SetUpMetadataOnImage(string filename, string tags)
-        {
-            uint paddingAmount = 2048;
-
-            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                BitmapDecoder original = BitmapDecoder.Create(file, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
-                JpegBitmapEncoder output = new JpegBitmapEncoder();
-
-                if (original.Frames[0] != null && original.Frames[0].Metadata != null)
-                {
-                    BitmapFrame frameCopy = (BitmapFrame)original.Frames[0].Clone();
-                    BitmapMetadata metadata = original.Frames[0].Metadata.Clone() as BitmapMetadata;
-
-                    metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
-                    metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
-                    metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
-                    metadata.SetQuery("System.Title", tags);
-
-                    output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
-
-                    file.Close();
-                    file.Dispose();
-
-
-                }
-                using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
-                {
-                    output.Save(outputFile);
-                }
-            }
-        }
-
+        //récupère les metadata des images
         public string[] GetTags(string filename)
         {
 
@@ -97,6 +65,7 @@ namespace PremierProjetPhotoViewer
             }
         }
 
+        //ajouter des metadata au images
         public void AddTags(string filename, string[] tags)
         {
 
@@ -147,6 +116,42 @@ namespace PremierProjetPhotoViewer
             }
         }
 
+        //Ajoute de l'espace dans les images pour les metadata
+        private static void SetUpMetadataOnImage(string filename, string tags)
+        {
+            uint paddingAmount = 2048;
+
+            using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                BitmapDecoder original = BitmapDecoder.Create(file, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
+                JpegBitmapEncoder output = new JpegBitmapEncoder();
+
+                if (original.Frames[0] != null && original.Frames[0].Metadata != null)
+                {
+                    BitmapFrame frameCopy = (BitmapFrame)original.Frames[0].Clone();
+                    BitmapMetadata metadata = original.Frames[0].Metadata.Clone() as BitmapMetadata;
+
+                    metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
+                    metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
+                    metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
+                    metadata.SetQuery("System.Title", tags);
+
+                    output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
+
+                    file.Close();
+                    file.Dispose();
+
+                }
+                using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
+                {
+                    output.Save(outputFile);
+                }
+            }
+        }
+
+       
+
+        
 
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
@@ -180,6 +185,7 @@ namespace PremierProjetPhotoViewer
 
         }
 
+        //selectione le dossier voulu, crée une liste d'image et renomme les photos
         private void BrowseThumbnaiButton_Click(object sender, RoutedEventArgs e)
         {
 
@@ -257,7 +263,7 @@ namespace PremierProjetPhotoViewer
             public static string DateCreate { get; set; }
         }
 
-
+        //envoie les tags à la méthode getTags
         private void TagButton_Click(object sender, RoutedEventArgs e)
         {
             ImageList.ItemsSource = null;
@@ -270,6 +276,7 @@ namespace PremierProjetPhotoViewer
 
 
 
+        //crée un aperçu de l'image cliqué
         private void ImageButton_Click(object sender, MouseButtonEventArgs e)
         {
             var clickedImage = (System.Windows.Controls.Image)e.OriginalSource;
@@ -290,26 +297,81 @@ namespace PremierProjetPhotoViewer
             stream.Dispose();
             ImageViewer1.Source = bitmap;
         }
- 
-        
 
+
+
+        //recherche les images selon les mots tapé
         ObservableCollection<ImageDetails> listImage = new ObservableCollection<ImageDetails>();
+        ObservableCollection<MetadataDetails> metadatas = new ObservableCollection<MetadataDetails>();
         private void txtNameToSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
-            listImage = RetrieveList.myList;   
-            string txtOrig = txtNameToSearch.Text;
-            string upper = txtOrig.ToUpper();
-            string lower = txtOrig.ToLower();
 
-            var imgFiltered = from Img in listImage
-                              let ename = Img.FileName
-                              where
-                               ename.StartsWith(lower)
-                               || ename.StartsWith(upper)
-                               || ename.Contains(txtOrig)
-                              select Img;
+            if(listImage.Count == 0)
+            {
+                foreach (var image in RetrieveList.myList)
+                {
+                    Stream fs = File.Open(image.Path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+                    BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                    BitmapFrame frame = decoder.Frames[0];
+                    BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
+                    ImageDetails Meta = new ImageDetails()
+                    {
+                        ApplicationName = metadata.ApplicationName,
+                        CameraModel = metadata.CameraModel,
+                        Keywords = metadata.Keywords,
+                        Author = metadata.Author,
+                        Comment = metadata.Comment,
+                        Name = image.Name,
+                        FileName = image.FileName,
+                        Path = image.Path
+
+                    };
+                    listImage.Add(Meta);
+                }
+            }
+
+
+           
+                string txtOrig = txtNameToSearch.Text;
+                string upper = txtOrig.ToUpper();
+                string lower = txtOrig.ToLower();
+
+                var imgFiltered = from Img in listImage
+                                  let ename = Img.FileName
+                                  let enames = Img.Comment
+                                  where
+                                 ename.StartsWith(lower)
+                                 || ename.StartsWith(upper)
+                                 || ename.Contains(txtOrig)
+                                 || enames.StartsWith(lower)
+                                 || enames.StartsWith(upper)
+                                 || enames.Contains(txtOrig)
+                                  select Img;
+
+            
 
             ImageList.ItemsSource = imgFiltered;
+            
+
+             
+              
+
+            
+
+
+            /*  string txtOrig = txtNameToSearch.Text;
+              string upper = txtOrig.ToUpper();
+              string lower = txtOrig.ToLower();
+
+              var imgFiltered = from Img in listImage
+                                let ename = Img.Author[0]
+                                where
+                                 ename.StartsWith(lower)
+                                 || ename.StartsWith(upper)
+                                 || ename.Contains(txtOrig)
+                                select Img;
+
+              ImageList.ItemsSource = imgFiltered;*/
         }
 
     }
