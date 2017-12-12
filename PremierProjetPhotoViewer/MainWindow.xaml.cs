@@ -43,11 +43,14 @@ namespace PremierProjetPhotoViewer
             {
                 //decode l'image pour récupérer les metadata
                 BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+                // saisi les frames bitmap, qui contiennent les metadata
                 BitmapFrame frame = decoder.Frames[0];
+
+                // obtiens les metadata en tant que BitmapMetadata
                 BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
 
-                //libère le stream
-                fs.Flush();
+                //Ferme et libère le stream               
                 fs.Close();
                 fs.Dispose();
 
@@ -85,15 +88,19 @@ namespace PremierProjetPhotoViewer
 
                 //decode l'image pour récupérer les metadata
                 BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.None);
+
+                // saisi les frames bitmap, qui contiennent les metadata
                 BitmapFrame frame = decoder.Frames[0];
+
+                // obtiens les metadata en tant que BitmapMetadata
                 BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
 
-                //
+                // instancie InPlaceBitmapMetadataWriter pour écrire les metadata dans l'image
                 InPlaceBitmapMetadataWriter writer = frame.CreateInPlaceBitmapMetadataWriter();
 
                 string[] keys;
 
-                //si des mots clé existe déjà
+                //si des metadata existent déjà
                 if (metadata.Keywords != null)
                 {
                     //créé la liste complète des tags, vieux et nouveau
@@ -124,7 +131,7 @@ namespace PremierProjetPhotoViewer
                     writer.SetQuery("System.Author", tag2);
                 }
 
-                //si il n'y a pas de tag existant
+                //si il n'y a pas de metadata existante
                 else
                 {
                     keys = tags;
@@ -156,25 +163,39 @@ namespace PremierProjetPhotoViewer
             //ouvre un stream pour l'image
             using (Stream file = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
+
+                // créer le decodeur pour l'image originale 
                 BitmapDecoder original = BitmapDecoder.Create(file, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
+
+                // créer un encodeur pour l'image de sortie
                 JpegBitmapEncoder output = new JpegBitmapEncoder();
 
+                // ajoute le padding et les tags à l'image, as well as clone the data to another object
                 if (original.Frames[0] != null && original.Frames[0].Metadata != null)
                 {
+                    //Comme l'image est utilisée, l'objet BitmapMetadata est gelé.
+                    //l'objet est donc cloné et ajouté dans le padding               
                     BitmapFrame frameCopy = (BitmapFrame)original.Frames[0].Clone();
                     BitmapMetadata metadata = original.Frames[0].Metadata.Clone() as BitmapMetadata;
 
+                    //utilise la même méthode que dans AddTags() en sauvant
+                    // we use the same method described in AddTags() as saving tags to save an amount of padding
                     metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
+
+                    //ajoute les metadata vouluent encore comme dans AddTags()         
                     metadata.SetQuery("System.Title", tags);
 
+                    //créer une nouvelle frame qui contiennent toute les nouvelles metadata et les ancienne                
                     output.Frames.Add(BitmapFrame.Create(frameCopy, frameCopy.Thumbnail, metadata, frameCopy.ColorContexts));
 
+                    //ferme et libère le stream
                     file.Close();
                     file.Dispose();
 
                 }
+                // finally, save the new file over the old file
                 using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
                 {
                     output.Save(outputFile);
@@ -182,8 +203,10 @@ namespace PremierProjetPhotoViewer
             }
         }
 
+
+
         //selectione le dossier voulu, crée une liste d'image et renomme les photos
-        private void BrowseThumbnaiButton_Click(object sender, RoutedEventArgs e)
+        private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
             //défini les extensions suportée
             string[] supportedExtensions = new[] { ".bmp", ".jpeg", ".jpg", ".png", ".tiff" };
@@ -278,18 +301,37 @@ namespace PremierProjetPhotoViewer
                         FileName = System.IO.Path.GetFileName(file.ToString()),
                         //Extension = Path.GetExtension(file.ToString()) 
                     };
+
+                    //remplie variable filename avec le chemin complet de l'image dans la 
                     var filename = System.IO.Path.GetFullPath(file.ToString());
 
+                    //crée un objet bitmapImage
                     BitmapImage bitmap = new BitmapImage();
+
+                    //ouvre un stream pour l'image
                     FileStream stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+
+                    //initialise l'image
                     bitmap.BeginInit();
+
+                    //met en cache l'intégralité de l'image lors du chargement
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
+
+                    //définie la source du flux de données de la BitmapImage
                     bitmap.StreamSource = stream;
+
+                    //fin de l'initialisation de la BitmapImage
                     bitmap.EndInit();
+
+                    //ferme et libère le stream
                     stream.Close();
                     stream.Dispose();
+
+                    //stocke la hauteur et la largeur de l'image dans l'objet id
                     id.Width = bitmap.PixelWidth;
                     id.Height = bitmap.PixelHeight;
+
+                    //ajoute les propriétées de l'image à la collection image
                     images.Add(id);
                 }
 
@@ -302,7 +344,7 @@ namespace PremierProjetPhotoViewer
             }
         }
 
-        //objet statique pour garder une liste d'image, une date de prise de vue et une date de modification en memoire
+        //paramètre statique pour garder une liste d'image, une date de prise de vue et une date de modification en memoire
         public class RetrieveList
         {
             public static ObservableCollection<ImageDetails> myList { get; set; }
@@ -363,14 +405,22 @@ namespace PremierProjetPhotoViewer
 
             FileNameLabel.Content = selectedFileName;
 
-            //crée un objet bitmap
+            //crée un objet bitmapImage
             BitmapImage bitmap = new BitmapImage();
 
             //ouvre un stream pour l'image cliquée
             FileStream stream = new FileStream(selectedFileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+
+            //initialise l'image
             bitmap.BeginInit();
+
+            //met en cache l'intégralité de l'image lors du chargement
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
+
+            //définie la source du flux de données de la BitmapImage
             bitmap.StreamSource = stream;
+
+            //fin de l'initialisation de la BitmapImage
             bitmap.EndInit();
 
             //ferme et libère le stream
@@ -387,20 +437,30 @@ namespace PremierProjetPhotoViewer
         ObservableCollection<ImageDetails> listImage = new ObservableCollection<ImageDetails>();
         private void txtNameToSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
-
+            //si la collection listImage est vide
             if (listImage.Count == 0)
             {
+
+                //parcour toutes les images contenu dans la collection myList
                 foreach (var image in RetrieveList.myList)
                 {
+                    //ouvre un stream pour l'image
                     Stream fs = File.Open(image.Path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+
+                    //decode l'image pour récupérer les metadata
                     BitmapDecoder decoder = BitmapDecoder.Create(fs, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+                    // saisi les frames bitmap, qui contiennent les metadata
                     BitmapFrame frame = decoder.Frames[0];
+
+                    // obtiens les metadata en tant que BitmapMetadata
                     BitmapMetadata metadata = frame.Metadata as BitmapMetadata;
 
-                    //crée un objet contenant les paramètre voulue
+
+                    //crée un objet avec les paramètres voulue
                     ImageDetails Meta = new ImageDetails()
                     {
-                        ApplicationName = metadata.ApplicationName,
+
                         CameraModel = metadata.CameraModel,
                         Keywords = metadata.Keywords,
                         Author = metadata.Author,
@@ -409,13 +469,17 @@ namespace PremierProjetPhotoViewer
                         FileName = image.FileName,
                         Path = image.Path,
                     };
+
+                    //ajoute les propriétées des metadata à la collection listImage
                     listImage.Add(Meta);
                 }
             }
+
             string txtOrig = txtNameToSearch.Text;
             string upper = txtOrig.ToUpper();
             string lower = txtOrig.ToLower();
 
+            //requete pour filtrer les images
             var imgFiltered = from Img in listImage
                               let ename = Img.FileName
                               let enameComment = Img.Comment
@@ -435,27 +499,28 @@ namespace PremierProjetPhotoViewer
                                  || enameComment.StartsWith(upper)
                                  || enameComment.Contains(txtOrig)
 
-                                 || enameCameraModel.StartsWith(lower)
-                                 || enameCameraModel.StartsWith(upper)
-                                 || enameCameraModel.Contains(txtOrig)
+                              /*|| enameCameraModel.StartsWith(lower)
+                              || enameCameraModel.StartsWith(upper)
+                              || enameCameraModel.Contains(txtOrig)
 
-                                 || enameAuthor.StartsWith(lower)
-                                 || enameAuthor.StartsWith(upper)
-                                 || enameAuthor.Contains(txtOrig)
+                              || enameAuthor.StartsWith(lower)
+                              || enameAuthor.StartsWith(upper)
+                              || enameAuthor.Contains(txtOrig)
 
-                                 || enameKeywords.StartsWith(lower)
-                                 || enameKeywords.StartsWith(upper)
-                                 || enameKeywords.Contains(txtOrig)
+                              || enameKeywords.StartsWith(lower)
+                              || enameKeywords.StartsWith(upper)
+                              || enameKeywords.Contains(txtOrig)
 
 
-                                 || enameTitle.StartsWith(lower)
-                                 || enameTitle.StartsWith(upper)
-                                 || enameTitle.Contains(txtOrig)
+                              || enameTitle.StartsWith(lower)
+                              || enameTitle.StartsWith(upper)
+                              || enameTitle.Contains(txtOrig)*/
 
 
 
                               select Img;
 
+            //remplie ImageList avec les images filtrées
             ImageList.ItemsSource = imgFiltered;
 
 

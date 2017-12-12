@@ -10,65 +10,52 @@ namespace PremierProjetPhotoViewer.Model
     public class ImageDetails
     {
 
-        /// <summary>
-        /// A name for the image, not the file name.
-        /// </summary>
+        //un nom pour l'image, pas le nom du fichier      
         public string Name { get; set; }
 
-        /// <summary>
-        /// A description for the image.
-        /// </summary>
+        //une description pour l'image
         public string Description { get; set; }
 
-        /// <summary>
-        /// Full path such as c:\path\to\image.png
-        /// </summary>
+        //le chemin complet
         public string Path { get; set; }
 
-        /// <summary>
-        /// The image file name such as image.png
-        /// </summary>
+        //le nom de l'image        
         public string FileName { get; set; }
 
-        /// <summary>
-        /// The file name extension: bmp, gif, jpg, png, tiff, etc...
-        /// </summary>
+        //l'extension de l'image: jpg, bmp, png, etc...
         public string Extension { get; set; }
 
-        /// <summary>
-        /// The image height
-        /// </summary>
+        //la hauteur de l'image
         public int Height { get; set; }
 
-        /// <summary>
-        /// The image width.
-        /// </summary>
+        //la largeur de l'image
         public int Width { get; set; }
 
-        /// <summary>
-        /// The file size of the image.
-        /// </summary>
+        //la taille de l'image
         public long Size { get; set; }
 
-        public string ApplicationName { get; set; }
-
+        //l'auteur de l'image
         public ReadOnlyCollection<string> Author { get; set; }
 
+        //le fabriquant de l'appareil photo qui a pris l'image
         public string CameraManufacturer { get; set; }
 
+        //le model de l'appareil photo qui a pris l'image
         public string CameraModel { get; set; }
 
+        //les commentaire de l'image
         public string Comment { get; set; }
 
+        //le copyright de l'image
         public string Copyright { get; set; }
 
+        //les mots clé de l'image
         public ReadOnlyCollection<string> Keywords { get; set; }
 
-        public int Subject { get; set; }
-
+        //le titre le l'image
         public string Title { get; set; }
 
-       
+
     }
 
 }
