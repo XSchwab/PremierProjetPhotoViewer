@@ -140,7 +140,7 @@ namespace PremierProjetPhotoViewer
                     var tag2 = TagWriter2.Text;
 
                     //écrit les nouvelles metadata dans l'image
-                    writer.SetQuery("System.Title", Tag);
+                    writer.SetQuery("System.Keywords", Tag);
                     writer.SetQuery("System.Author", tag2);
                 }
 
@@ -178,8 +178,7 @@ namespace PremierProjetPhotoViewer
                     BitmapFrame frameCopy = (BitmapFrame)original.Frames[0].Clone();
                     BitmapMetadata metadata = original.Frames[0].Metadata.Clone() as BitmapMetadata;
 
-                    //utilise la même méthode que dans AddTags() en sauvant
-                    // we use the same method described in AddTags() as saving tags to save an amount of padding
+                    //utilise la même méthode que dans AddTags() pour sauver les metadata pour sauver un espace de padding                    
                     metadata.SetQuery("/app1/ifd/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/app1/ifd/exif/PaddingSchema:Padding", paddingAmount);
                     metadata.SetQuery("/xmp/PaddingSchema:Padding", paddingAmount);
@@ -195,7 +194,7 @@ namespace PremierProjetPhotoViewer
                     file.Dispose();
 
                 }
-                // finally, save the new file over the old file
+                // Finalement, sauvé la nouvelle image par dessus l'ancienne
                 using (Stream outputFile = File.Open(filename, FileMode.Create, FileAccess.Write))
                 {
                     output.Save(outputFile);
@@ -225,7 +224,7 @@ namespace PremierProjetPhotoViewer
                 //parcours le tableau de données
                 foreach (FileInfo f in infos)
                 {
-                    //récupère le nom de l'image
+                    //appelle la methode GetTags() pour récupèrer la date de prise de vue et de modification de l'image
                     GetTags(f.FullName);
 
                     //récupère la date de prise de vue de l'image
@@ -382,14 +381,16 @@ namespace PremierProjetPhotoViewer
 
 
 
-        //crée un aperçu de l'image cliqué
+        //crée un aperçu et récupère les metadata de l'image cliqué 
         private void ImageButton_Click(object sender, MouseButtonEventArgs e)
         {
             //récupère l'image cliquée
             var clickedImage = (System.Windows.Controls.Image)e.OriginalSource;
 
+            //crée un objet newImage de la classe Image 
             System.Windows.Controls.Image newImage = new System.Windows.Controls.Image();
 
+            //Assigne la valeur de l'image cliquée dans l'bjet newImage
             newImage.Source = clickedImage.Source;
 
             //récupère le chemin de l'image
@@ -401,8 +402,7 @@ namespace PremierProjetPhotoViewer
             //recupère les metadata de l'image cliquée
             GetTags(selectedFileName);
 
-            //var tags = GetTags(selectedFileName);
-
+            //remplie le FileNameLabel avec le nom de l'image
             FileNameLabel.Content = selectedFileName;
 
             //crée un objet bitmapImage
@@ -475,8 +475,13 @@ namespace PremierProjetPhotoViewer
                 }
             }
 
+            //assigne la valeur tapé dans la bar de recherche à la variable txtOrig
             string txtOrig = txtNameToSearch.Text;
+
+            //Convertie la valeur tapé dans la bar de recherche en majuscule
             string upper = txtOrig.ToUpper();
+
+            //Convertie la valeur tapé dans la bar de recherche en minuscule
             string lower = txtOrig.ToLower();
 
             //requete pour filtrer les images
@@ -488,9 +493,8 @@ namespace PremierProjetPhotoViewer
                               let enameAuthor = Img.Author[0]
                               let enameKeywords = Img.Keywords[0]
 
+                              //filtre avec ce que l'utilisateur a tapé dans la bar de recherche
                               where
-
-
                                  ename.StartsWith(lower)
                                  || ename.StartsWith(upper)
                                  || ename.Contains(txtOrig)

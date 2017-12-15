@@ -17,8 +17,8 @@
                     Current File:
                 </Label>
                 <Label Margin="5,0,0,0" Height="25" Name="FileNameLabel" Width="300" />
-                
-                <Button Margin="5,0,0,0" Height="23" Name="BrowseThumbnailButton" Width="75" Click="BrowseThumbnaiButton_Click">
+
+                <Button Margin="5,0,0,0" Height="23" Name="BrowseButton" Width="75" Click="BrowseButton_Click">
                     Browse folder
                 </Button>
                 <TextBlock Height="23" HorizontalAlignment="Left" Margin="60,18,0,0"
