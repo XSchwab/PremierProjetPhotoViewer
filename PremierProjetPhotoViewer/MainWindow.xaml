@@ -10,63 +10,116 @@
     <Window.Resources>
         <local1:UriToBitmapConverter x:Key="UriToBitmapConverter" />
     </Window.Resources>
-    <ScrollViewer>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal" Background="LightBlue" Height="40">
-                <Label Margin="10,0,0,0" Height="23" Name="Label1">
-                    Current File:
-                </Label>
-                <Label Margin="5,0,0,0" Height="25" Name="FileNameLabel" Width="300" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
 
-                <Button Margin="5,0,0,0" Height="23" Name="BrowseButton" Width="75" Click="BrowseButton_Click">
-                    Browse folder
-                </Button>
-                <TextBlock Height="23" HorizontalAlignment="Left" Margin="60,18,0,0"
-                Name="textBlock1" Text="Search Name"
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60*" />
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+
+            <RowDefinition Height="85*" />
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="85*"/>
+        </Grid.RowDefinitions>
+
+        <!--Navigation bar -->
+        <StackPanel Orientation="Horizontal" Background="#33adff" Grid.ColumnSpan="12">
+            <Label Margin="10,0,0,0" Height="23" Name="Label1">
+                Current File:
+            </Label>
+            <Label Margin="5,0,0,0" Height="25" Name="FileNameLabel" Width="300" />
+
+            <Button Margin="5,18,0,19" Name="BrowseThumbnailButton" Width="114" Click="BrowseButton_Click">
+                <!--  -->
+                Browse folder
+            </Button>
+            <TextBlock Height="23" HorizontalAlignment="Left" Margin="60,18,0,0"
+                x:Name="textBlock1" Text="Search Name"
                 VerticalAlignment="Top" Width="134" />
-                <TextBox Height="27" HorizontalAlignment="Left" Margin="208,13,0,0"
-                Name="txtNameToSearch" TextChanged="txtNameToSearch_TextChanged"
+            <TextBox Height="20" HorizontalAlignment="Left" Margin="208,20,0,0"
+                x:Name="txtNameToSearch" TextChanged="txtNameToSearch_TextChanged"
                 VerticalAlignment="Top" Width="202" />
-            </StackPanel>
-            <StackPanel >
+        </StackPanel>
 
-                <Image Name="ImageViewer1" Height="287" Margin="32,0" />
-                <Label>Keyword</Label>
-                <TextBox Name="TagWriter" Height="23" TextWrapping="Wrap"  />
-                <Label>Auteur</Label>
-                <TextBox Name="TagWriter2" Height="23" TextWrapping="Wrap"  />
-                <Button Margin="5,0,0,0" Height="23" Name="TagButton" Width="75"  Click="TagButton_Click">
+        <!--Image and tag -->
+        <Image Name="ImageViewer1" Margin="15,0" Grid.Column="8" Grid.ColumnSpan="4" Grid.Row="1" Grid.RowSpan="4"/>
+        <StackPanel Grid.ColumnSpan="4" Grid.Column="8" Grid.Row="5" Grid.RowSpan="7" Margin="10" >
+            <Grid Height="511">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Label Margin="0,0,205,41" Grid.ColumnSpan="2">Keyword</Label>
+                <TextBox Name="TagWriter" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="0,38,5,13"  />
+                <Label Margin="1,32,205,12" Grid.ColumnSpan="2">Auteur</Label>
+                <TextBox Name="TagWriter2" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="0,0,1,50"  />
+                <Button Margin="49,35,44,12" Name="TagButton"  Click="TagButton_Click" Grid.Column="2">
                     Set Tag
                 </Button>
-                <Label>Keyword</Label>
-                <TextBlock Name="TagViewer1" Height="39" Width="400" Margin="756,0" />
-                <Label>Auteur</Label>
-                <TextBlock x:Name="TagViewer2" Height="58" Width="400" Margin="756,0" />
-
-            </StackPanel>
-
-            <Grid>
-                <ItemsControl Name="ImageList" ItemsSource="{Binding ImageList}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderThickness="1" BorderBrush="#FFD0D1D7" Padding="5" Margin="10,10,0,0">
-                                <StackPanel Orientation="Horizontal">
-
-                                    <!--image and dimensions-->
-                                    <Grid Width="88" Height="55">
-
-                                        <Image Source="{Binding Path, Converter={StaticResource UriToBitmapConverter}}" MouseLeftButtonDown="ImageButton_Click"/>
-                                    </Grid>
-                                    <!--name, type and size-->
-                                    <StackPanel Orientation="Horizontal" Margin="5,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Name="ImageName" Margin="1" Foreground="#FF787878" Text="{Binding FileName}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <Label Margin="0,2,0,46" Grid.Row="1">Keyword</Label>
+                <TextBlock Name="TagViewer1" Grid.Column="1" Margin="0,5,0,46" Grid.Row="1" />
+                <Label Margin="0,35,0,15" Grid.Row="1">Auteur</Label>
+                <TextBlock x:Name="TagViewer2" Margin="0,35,1,15" Grid.Column="1" Grid.Row="1" />
             </Grid>
+
         </StackPanel>
-    </ScrollViewer>
+        <!-- picture folder   -->
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="11" Grid.Column="0" Grid.ColumnSpan="8">
+            <ItemsControl Name="ImageList" ItemsSource="{Binding ImageList}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="#FFD0D1D7" Padding="5" Margin="10,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+
+                                <!--image and dimensions-->
+                                <Grid Width="88" Height="55">
+
+                                    <Image Source="{Binding Path, Converter={StaticResource UriToBitmapConverter}}" MouseLeftButtonDown="ImageButton_Click"/>
+                                </Grid>
+                                <!--name, type and size-->
+                                <StackPanel Orientation="Horizontal" Margin="5,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Name="ImageName" Margin="1" Foreground="#FF787878" Text="{Binding FileName}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
 </Window>

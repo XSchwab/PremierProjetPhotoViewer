@@ -494,11 +494,12 @@ namespace PremierProjetPhotoViewer
                               let enameKeywords = Img.Keywords[0]
 
                               //filtre avec ce que l'utilisateur a tapé dans la bar de recherche
-                              where
+                              where 
                                  ename.StartsWith(lower)
                                  || ename.StartsWith(upper)
                                  || ename.Contains(txtOrig)
 
+                          
                                  || enameComment.StartsWith(lower)
                                  || enameComment.StartsWith(upper)
                                  || enameComment.Contains(txtOrig)
