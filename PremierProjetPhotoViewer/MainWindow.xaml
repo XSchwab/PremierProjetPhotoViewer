@@ -85,16 +85,27 @@
                 </Grid.RowDefinitions>
 
                 <Label Margin="0,0,205,41" Grid.ColumnSpan="2">Keyword</Label>
-                <TextBox Name="TagWriter" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="0,38,5,13"  />
+                <TextBox Name="TagWriter" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="1,0,1,50"  />
                 <Label Margin="1,32,205,12" Grid.ColumnSpan="2">Auteur</Label>
-                <TextBox Name="TagWriter2" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="0,0,1,50"  />
-                <Button Margin="49,35,44,12" Name="TagButton"  Click="TagButton_Click" Grid.Column="2">
+                <TextBox Name="TagWriter2" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="1,32,0,18"  />
+                <Label Margin="1,66,205,51" Grid.ColumnSpan="2" Content="Commentaire" Grid.RowSpan="2"/>
+                <TextBox x:Name="TagWriter3" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="1,66,0,57" Grid.RowSpan="2"  />
+                <Label Margin="1,27,205,17" Grid.ColumnSpan="2" Content="Titre" Grid.Row="1"/>
+                <TextBox x:Name="TagWriter4" Height="23" TextWrapping="Wrap" Grid.Column="1" Margin="1,27,1,23" Grid.Row="1"  />
+                <Button Margin="49,24,44,23" Name="TagButton"  Click="TagButton_Click" Grid.Column="2" Grid.Row="1">
                     Set Tag
                 </Button>
-                <Label Margin="0,2,0,46" Grid.Row="1">Keyword</Label>
-                <TextBlock Name="TagViewer1" Grid.Column="1" Margin="0,5,0,46" Grid.Row="1" />
-                <Label Margin="0,35,0,15" Grid.Row="1">Auteur</Label>
-                <TextBlock x:Name="TagViewer2" Margin="0,35,1,15" Grid.Column="1" Grid.Row="1" />
+                <Label Margin="0,6,0,42" Grid.Row="3">Keyword</Label>
+                <TextBlock Name="TagViewer1" Grid.Column="1" Margin="0,9,0,42" Grid.Row="3" />
+                <Label Margin="0,39,0,11" Grid.Row="3">Auteur</Label>
+                <TextBlock x:Name="TagViewer2" Margin="1,39,0,11" Grid.Row="3" Grid.Column="1" />
+                <Label Margin="-1,0,1,50" Grid.Row="4" Content="Comentaire"/>
+                <TextBlock x:Name="TagViewer3" Margin="1,0,0,50" Grid.Row="4" Grid.Column="1" />
+                <Label Margin="1,30,205,20" Grid.Row="4" Content="Titre" Grid.ColumnSpan="2"/>
+                <TextBlock x:Name="TagViewer4" Margin="1,30,0,20" Grid.Row="4" Grid.Column="1" />
+
+
+
             </Grid>
 
         </StackPanel>

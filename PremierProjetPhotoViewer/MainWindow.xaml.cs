@@ -49,6 +49,7 @@ namespace PremierProjetPhotoViewer
 
 
                 //affiche les metadata voulue si elles existent
+               
                 if (metadata.Keywords != null)
                 {
                     TagViewer1.Text = metadata.Keywords[0];
@@ -56,6 +57,16 @@ namespace PremierProjetPhotoViewer
                 if (metadata.Author != null)
                 {
                     TagViewer2.Text = metadata.Author[0];
+                }
+             
+                if (metadata.Comment != null)
+                {
+                    TagViewer3.Text = metadata.Comment;
+                }
+
+                if (metadata.Title != null)
+                {
+                    TagViewer4.Text = metadata.Title;
                 }
 
                 //obtient la date de modification de l'image
@@ -99,6 +110,8 @@ namespace PremierProjetPhotoViewer
                     //récupère les valeurs des textbox
 
                     var Authors = TagWriter2.Text;
+                    var Comment = TagWriter3.Text;
+                    var Title = TagWriter4.Text;                
                     int i = 0;
 
                     //récupère la valeur des mots clé existant
@@ -115,10 +128,25 @@ namespace PremierProjetPhotoViewer
                         i++;
                     }
 
-
                     //écrit les nouvelles metadata dans l'image
+
                     writer.SetQuery("System.Keywords", keys);
-                    writer.SetQuery("System.Author", Authors);
+
+                    if(TagWriter2.Text != "")
+                    {
+                        writer.SetQuery("System.Author", Authors);
+                    }
+
+                    if (TagWriter3.Text != "")
+                    {
+                        writer.SetQuery("System.Comment", Comment);
+                    }
+
+                    if (TagWriter4.Text != "")
+                    {
+                        writer.SetQuery("System.Title", Title);
+                    }
+                   
                 }
 
                 //si il n'y a pas de metadata existante
@@ -126,12 +154,31 @@ namespace PremierProjetPhotoViewer
                 {
                     keys = tags;
                     //récupère les valeurs des textbox
-                    var Tag = TagWriter.Text;
-                    var tag2 = TagWriter2.Text;
+                    var Keyword = TagWriter.Text;
+                    var Authors = TagWriter2.Text;
+                    var Comment = TagWriter3.Text;
+                    var Title = TagWriter4.Text;
 
                     //écrit les nouvelles metadata dans l'image
-                    writer.SetQuery("System.Keywords", Tag);
-                    writer.SetQuery("System.Author", tag2);
+                    if(TagWriter.Text != "")
+                    {
+                        writer.SetQuery("System.Keywords", Keyword);
+                    }
+                   
+                    if (TagWriter2.Text != "")
+                    {
+                        writer.SetQuery("System.Author", Authors);
+                    }
+
+                    if (TagWriter3.Text != "")
+                    {
+                        writer.SetQuery("System.Comment", Comment);
+                    }
+
+                    if (TagWriter4.Text != "")
+                    {
+                        writer.SetQuery("System.Title", Title);
+                    }
                 }
 
                 //si il n'y a pas d'espace pour stocké les nouvelles metadata 
