@@ -1,25 +1,15 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Forms;
 using System.IO;
-using System.Net;
-using System.Drawing;
 using PremierProjetPhotoViewer.Model;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace PremierProjetPhotoViewer
 {
@@ -54,7 +44,7 @@ namespace PremierProjetPhotoViewer
                 fs.Close();
                 fs.Dispose();
 
-                //Crée le tableau de metadata
+                //Crée un tableau de mots clé
                 string[] tags = metadata.GetQuery("System.Keywords") as string[];
 
 
@@ -100,7 +90,7 @@ namespace PremierProjetPhotoViewer
 
                 string[] keys;
 
-                //si des metadata existent déjà
+                //si des mots clé existent déjà
                 if (metadata.Keywords != null)
                 {
                     //créé la liste complète des tags, vieux et nouveau
@@ -108,7 +98,7 @@ namespace PremierProjetPhotoViewer
 
                     //récupère les valeurs des textbox
 
-                    var tag2 = TagWriter2.Text;
+                    var Authors = TagWriter2.Text;
                     int i = 0;
 
                     //récupère la valeur des mots clé existant
@@ -128,7 +118,7 @@ namespace PremierProjetPhotoViewer
 
                     //écrit les nouvelles metadata dans l'image
                     writer.SetQuery("System.Keywords", keys);
-                    writer.SetQuery("System.Author", tag2);
+                    writer.SetQuery("System.Author", Authors);
                 }
 
                 //si il n'y a pas de metadata existante
@@ -224,65 +214,70 @@ namespace PremierProjetPhotoViewer
                 //parcours le tableau de données
                 foreach (FileInfo f in infos)
                 {
-                    //appelle la methode GetTags() pour récupèrer la date de prise de vue et de modification de l'image
-                    GetTags(f.FullName);
-
-                    //récupère la date de prise de vue de l'image
-                    var DateTaken = RetrieveList.DateList;
-
-                    //récupère la date de modification de l'image
-                    var DateModificate = RetrieveList.DateModificate;
-
-                    //reformate la date de modification
-                    DateModificate = DateModificate.Replace(@"/", @"-");
-                    DateModificate = DateModificate.Replace(@":", @"-");
-                    DateModificate = DateModificate.Replace(@" ", @"--");
-
-                    //si la date de prise de vue n'existe pas
-                    if (DateTaken == null)
+                    //evite de prendre en compte le fichier Thumbs.db
+                    if (f.Extension != ".db")
                     {
-                        //récupère le nom actuelle de l'image
-                        string ImgName = f.Name;
+                        //appelle la methode GetTags() pour récupèrer la date de prise de vue et de modification de l'image
+                        GetTags(f.FullName);
 
-                        //découpe le nom avant et après le character "_"
-                        var name = ImgName.Split('_');
+                        //récupère la date de prise de vue de l'image
+                        var DateTaken = RetrieveList.DateList;
 
-                        //defini la variable verifyingString avec la chaine de caractère précédent le caractère "_"
-                        string verifyString = name[0];
+                        //récupère la date de modification de l'image
+                        var DateModificate = RetrieveList.DateModificate;
 
-                        //vérifie si la variable verifyString n'a pas le même contenu que la date de modification
-                        if (verifyString != DateModificate)
+                        //reformate la date de modification
+                        DateModificate = DateModificate.Replace(@"/", @"-");
+                        DateModificate = DateModificate.Replace(@":", @"-");
+                        DateModificate = DateModificate.Replace(@" ", @"--");
+
+                        //si la date de prise de vue n'existe pas
+                        if (DateTaken == null)
                         {
-                            //renomme l'image avec la date de modificattion et le nom du dossier
-                            File.Move(f.FullName, f.DirectoryName + "\\" + DateModificate + "_" + d.Name + f.Extension);
+                            //récupère le nom actuelle de l'image
+                            string ImgName = f.Name;
+
+                            //découpe le nom avant et après le character "_"
+                            var name = ImgName.Split('_');
+
+                            //defini la variable verifyingString avec la chaine de caractère précédent le caractère "_"
+                            string verifyString = name[0];
+
+                            //vérifie si la variable verifyString n'a pas le même contenu que la date de modification
+                            if (verifyString != DateModificate)
+                            {
+                                //renomme l'image avec la date de modificattion et le nom du dossier
+                                File.Move(f.FullName, f.DirectoryName + "\\" + DateModificate + "_" + d.Name + f.Extension);
+                            }
+                        }
+
+                        //si la date de prise de vue existe
+                        else
+                        {
+
+                            //reformate la date de prise de vue
+                            DateTaken = DateTaken.Replace(@"/", @"-");
+                            DateTaken = DateTaken.Replace(@":", @"-");
+                            DateTaken = DateTaken.Replace(@" ", @"--");
+
+                            //récupère le nom actuelle de l'image
+                            string ImgName = f.Name;
+
+                            //découpe le nom avant et après le character "_"
+                            var name = ImgName.Split('_');
+
+                            //defini la variable verifyingString avec la chaine de caractère précédent le caractère "_"
+                            string verifyString = name[0];
+
+                            //vérifie si la variable verifyString n'a pas le même contenu que la date de prise de vue
+                            if (verifyString != DateTaken)
+                            {
+                                //renomme l'image avec la date de prise de vue et le nom du dossier
+                                File.Move(f.FullName, f.DirectoryName + "\\" + DateTaken + "_" + d.Name + f.Extension);
+                            }
                         }
                     }
 
-                    //si la date de prise de vue existe
-                    else
-                    {
-
-                        //reformate la date de prise de vue
-                        DateTaken = DateTaken.Replace(@"/", @"-");
-                        DateTaken = DateTaken.Replace(@":", @"-");
-                        DateTaken = DateTaken.Replace(@" ", @"--");
-
-                        //récupère le nom actuelle de l'image
-                        string ImgName = f.Name;
-
-                        //découpe le nom avant et après le character "_"
-                        var name = ImgName.Split('_');
-
-                        //defini la variable verifyingString avec la chaine de caractère précédent le caractère "_"
-                        string verifyString = name[0];
-
-                        //vérifie si la variable verifyString n'a pas le même contenu que la date de prise de vue
-                        if (verifyString != DateTaken)
-                        {
-                            //renomme l'image avec la date de prise de vue et le nom du dossier
-                            File.Move(f.FullName, f.DirectoryName + "\\" + DateTaken + "_" + d.Name + f.Extension);
-                        }
-                    }
                 }
 
                 //récupère les données de chaque images
@@ -432,18 +427,24 @@ namespace PremierProjetPhotoViewer
         }
 
 
+        //crée la liste "listImage"
+        List<ImageDetails> listImage = new List<ImageDetails>();
 
-        //recherche les images selon les mots tapé
-        ObservableCollection<ImageDetails> listImage = new ObservableCollection<ImageDetails>();
+        //crée la liste "listImageSearch"
+        List<ImageDetails> listImageSearch = new List<ImageDetails>();
+
         private void txtNameToSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
+            //netoye la liste "listImageSearch"
+            listImageSearch.Clear();
+
             //si la collection listImage est vide
             if (listImage.Count == 0)
             {
-
                 //parcour toutes les images contenu dans la collection myList
                 foreach (var image in RetrieveList.myList)
                 {
+
                     //ouvre un stream pour l'image
                     Stream fs = File.Open(image.Path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
 
@@ -484,52 +485,124 @@ namespace PremierProjetPhotoViewer
             //Convertie la valeur tapé dans la bar de recherche en minuscule
             string lower = txtOrig.ToLower();
 
-            //requete pour filtrer les images
-            var imgFiltered = from Img in listImage
-                              let ename = Img.FileName
-                              let enameComment = Img.Comment
-                              let enameCameraModel = Img.CameraModel
-                              let enameTitle = Img.Title
-                              let enameAuthor = Img.Author[0]
-                              let enameKeywords = Img.Keywords[0]
+            //requete pour filtrer les commentaires
+            var commentFiltered = from Img in listImage
+                                  let enameComment = Img.Comment
 
-                              //filtre avec ce que l'utilisateur a tapé dans la bar de recherche
-                              where 
-                                 ename.StartsWith(lower)
-                                 || ename.StartsWith(upper)
-                                 || ename.Contains(txtOrig)
+                                  //filtre les images qui n'ont pas de commentaires                       
+                                  where Img.Comment != null
 
-                          
-                                 || enameComment.StartsWith(lower)
-                                 || enameComment.StartsWith(upper)
-                                 || enameComment.Contains(txtOrig)
-
-                              /*|| enameCameraModel.StartsWith(lower)
-                              || enameCameraModel.StartsWith(upper)
-                              || enameCameraModel.Contains(txtOrig)
-
-                              || enameAuthor.StartsWith(lower)
-                              || enameAuthor.StartsWith(upper)
-                              || enameAuthor.Contains(txtOrig)
-
-                              || enameKeywords.StartsWith(lower)
-                              || enameKeywords.StartsWith(upper)
-                              || enameKeywords.Contains(txtOrig)
+                                  //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                  where
+                                            enameComment.StartsWith(lower)
+                                         || enameComment.StartsWith(upper)
+                                         || enameComment.Contains(txtOrig)
 
 
-                              || enameTitle.StartsWith(lower)
-                              || enameTitle.StartsWith(upper)
-                              || enameTitle.Contains(txtOrig)*/
+                                  select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(commentFiltered);
+
+            //requete pour filtrer les modèle de camera
+            var cameraModelFiltered = from Img in listImage
+                                      let enameCameraModel = Img.CameraModel
+
+
+                                      //filtre les images qui n'ont pas de modèle de camera                       
+                                      where Img.CameraModel != null
+
+                                      //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                      where
+                                                enameCameraModel.StartsWith(lower)
+                                             || enameCameraModel.StartsWith(upper)
+                                             || enameCameraModel.Contains(txtOrig)
+
+
+                                      select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(cameraModelFiltered);
+
+            //requete pour filtrer les titres
+            var titleFiltered = from Img in listImage
+                                let enameTitle = Img.Title
+
+                                //filtre les images qui n'ont pas de titres                       
+                                where Img.Title != null
+
+                                //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                where
+                                          enameTitle.StartsWith(lower)
+                                       || enameTitle.StartsWith(upper)
+                                       || enameTitle.Contains(txtOrig)
+
+
+                                select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(titleFiltered);
 
 
 
-                              select Img;
+            //requete pour filtrer les auteurs
+            var authorFiltered = from Img in listImage
+                                 let enameAuthor = Img.Author
 
-            //remplie ImageList avec les images filtrées
-            ImageList.ItemsSource = imgFiltered;
+                                 //filtre les images qui n'ont pas d'auteurs                       
+                                 where Img.Author != null
 
+                                 //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                 where
+                                           enameAuthor[0].StartsWith(lower)
+                                        || enameAuthor[0].StartsWith(upper)
+                                        || enameAuthor[0].Contains(txtOrig)
+
+                                 select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(authorFiltered);
+
+            //requete pour filtrer les mots clé
+            var keywordsFiltered = from Img in listImage
+                                   let enameKeywords = Img.Keywords
+
+                                   //filtre les images qui n'ont pas de mots clé                       
+                                   where Img.Keywords != null
+
+                                   //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                   where
+                                             enameKeywords[0].StartsWith(lower)
+                                          || enameKeywords[0].StartsWith(upper)
+                                          || enameKeywords[0].Contains(txtOrig)
+
+                                   select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(keywordsFiltered);
+
+            //requete pour filtrer les noms des images
+            var fileNameFiltered = from Img in listImage
+
+                                   let ename = Img.FileName
+
+                                   //filtre avec ce que l'utilisateur a tapé dans la bar de recherche    
+                                   where ename.StartsWith(lower)
+                                          || ename.StartsWith(upper)
+                                          || ename.Contains(txtOrig)
+
+
+                                   select Img;
+
+            //ajoute les images filtré à la liste listeImageSearch
+            listImageSearch.AddRange(fileNameFiltered);
+
+            //enleve les doublon du au deux condition where          
+            IEnumerable<ImageDetails> sansDoublon = listImageSearch.Distinct();
+
+            //Convertie ImageList en observableCollection, la remplie avec les images filtrées et les classe par nom de fichier   
+            ImageList.ItemsSource = sansDoublon.OrderBy(ImageDetails => ImageDetails.FileName).ToObservableCollection();
 
         }
-
     }
 }
