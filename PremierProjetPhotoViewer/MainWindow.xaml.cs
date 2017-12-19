@@ -128,8 +128,7 @@ namespace PremierProjetPhotoViewer
                         i++;
                     }
 
-                    //écrit les nouvelles metadata dans l'image
-
+                    //écrit les nouvelles metadata dans l'image si le TagWriter n'est pas vide
                     writer.SetQuery("System.Keywords", keys);
 
                     if(TagWriter2.Text != "")

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"       
         xmlns:local1="clr-namespace:PremierProjetPhotoViewer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1062.5" Width="1920">
+        Title="QXPhotoViewer" Height="1062.5" Width="1920">
 
     <Window.Resources>
         <local1:UriToBitmapConverter x:Key="UriToBitmapConverter" />
