@@ -1,23 +1,24 @@
-**PremierProjetPhotoVIewer :**	
+#PremierProjetPhotoViewer
 
 Dossier contenant l’application
 
-**Documentation :** 			
+# Documentation 			
+- Documentation du projet
+- Cahier des charges
+-  Annexe 
 
-Fichiers de documentation
-
-**Onepager :** 					
+# Onepager 					
 
 Présentation générale du projet
 
-**JournaldeBord :** 			
+#JournalDeBord			
 
 Dossier contenant les journaux de bords
 
-**Installation :**				
+# Installation		
 
 Dossier contenant les fichiers d’installation 
 
-**Procédure d’installation :**
+# Procédure d’installation
 
-Cliquez sur le fichier «PhotoInstaller.msi» contenu dans le dossier "Installation", choisissez l'emplacement ou vous voulez l'installer puis cliquez sur « suivant »
+Cliquez sur le fichier « setup.exe » contenu dans le dossier Installation puis cliquez sur « installer »
