@@ -1,4 +1,4 @@
-#PremierProjetPhotoViewer
+# PremierProjetPhotoViewer
 
 Dossier contenant l’application
 
@@ -11,7 +11,7 @@ Dossier contenant l’application
 
 Présentation générale du projet
 
-#JournalDeBord			
+# JournalDeBord			
 
 Dossier contenant les journaux de bords
 
